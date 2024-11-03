@@ -3,6 +3,8 @@
 #include <queue>
 #include <cmath>
 
+const bool is_debug = false;
+
 struct Arc {
   int weight;
   int dest;
@@ -88,9 +90,9 @@ std::vector<int> astar(std::vector<Arc>* graph, int rows, int columns, int arcs,
   // 1. Sum of distance and expected distance
   // 2. Node index
   std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, DistanceComparator> q;
-  visited[0] = true;
-  distances[0] = 0;
-  q.push(to_pair(distances_heuristic[0] + 0, 0));
+  visited[from] = true;
+  distances[from] = 0;
+  q.push(to_pair(distances_heuristic[from] + 0, from));
   while(!q.empty()) {
     std::pair<int, int> current_pair = q.top();
     int current = current_pair.second;
@@ -115,13 +117,27 @@ std::vector<int> astar(std::vector<Arc>* graph, int rows, int columns, int arcs,
     res.push_back(current);
     current = came_from[current];
   }
+
+  if(is_debug) {
+    std::cout << "Camefrom:\n";
+    for(int i = 0; i < rows * columns; ++i) {
+      std::cout << "\t" << i << ": " << came_from[i] << "\n";
+    }
+  }
+
+  delete visited;
+  delete distances_heuristic;
+  delete distances;
+  delete came_from;
+
   return res;
 }
 
 void display_elements(std::vector<int> v, bool skip_last = false) {
   // It is important to skip the last element from the first path, as it'd be an overlap otherwise
   while(!v.empty()) {
-    std::cout << v.back() << " ";
+    if(!skip_last || v.size() != 1)
+      std::cout << v.back() << " ";
     v.pop_back();
   }
 }
@@ -134,15 +150,20 @@ int main() {
   int start_point = 0;
   int middle_point = rows - 1;
   int end_point = middle_point * columns;
-  std::cout << "Start: " << start_point
+  if(is_debug) std::cout << "Start: " << start_point
             << "\nVia: " << middle_point
             << "\nTo: " << end_point << "\n";
 
   std::vector<int> path1 = astar(graph, rows, columns, arcs, start_point, middle_point);
   std::vector<int> path2 = astar(graph, rows, columns, arcs, middle_point, end_point);
-  std::cout<< "Path 1: ";
-  display_elements(path1);
-  std::cout << "\nPath 2: ";
+
+  // -1 because the middle element is doubled
+  int total_length = path1.size() + path2.size() - 1;
+
+  std::cout << total_length << "\n";
+  if(is_debug) std::cout<< "Path 1: ";
+  display_elements(path1, true);
+  if(is_debug) std::cout << "\nPath 2: ";
   display_elements(path2);
 
   delete graph;

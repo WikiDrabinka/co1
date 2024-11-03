@@ -49,10 +49,20 @@ std::pair<int, int> get_coordinates(int index, int rows, int columns) {
   res.first = (index - (index % columns)) / columns;
   return res;
 }
+int get_distance_squared(int index1, int index2, int rows, int columns) {
+  std::pair<int, int> p1, p2;
+  p1 = get_coordinates(index1, rows, columns);
+  p2 = get_coordinates(index2, rows, columns);
+  return (p1.first - p2.first) * (p1.first - p2.first) + (p1.second - p2.second) * (p1.second - p2.second);
+}
 
 std::vector<int> astar(std::vector<Arc>* graph, int rows, int columns, int arcs, int from, int to) {
   std::vector<int> res;
   res.clear();
+
+  bool* visited;
+  visited = new bool[rows * columns];
+  for(int i = 0; i < rows * columns; ++i) { visited[i] = false; }
 }
 
 int main() {
